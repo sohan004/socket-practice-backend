@@ -3,30 +3,30 @@ const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
 const http = require('http');
-const { Server } = require('socket.io');
+
 
 app.use(cors())
 app.use(express.json())
 
 
 
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    },
-});
+// const server = http.createServer(app);
+// const io = new Server(server, {
+//     cors: {
+//         origin: '*',
+//         methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//     },
+// });
 
-// Add this
-// Listen for when the client connects via socket.io-client
-io.on('connection', (socket) => {
-    console.log(`User connected ${socket.id}`);
+// // Add this
+// // Listen for when the client connects via socket.io-client
+// io.on('connection', (socket) => {
+//     console.log(`User connected ${socket.id}`);
 
-    // We can write our socket event listeners in here...
-    
-    
-});
+//     // We can write our socket event listeners in here...
+
+
+// });
 
 
 
@@ -82,4 +82,18 @@ app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
-server.listen(port)
+const server = app.listen(port)
+const io = require('socket.io')(server, {
+    pingTimeout: 60000,
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    },
+});
+
+io.on('connection', (socket) => {
+    console.log(`User connected on socket`);
+    socket.on('dis', () => {
+        io.emit('databaseChange', { name: 'user disconnected' });
+    });
+});
